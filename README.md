@@ -84,7 +84,18 @@ When clicking on one of the `Hotels`, `Cities` or `Countries` links, the applica
 
 <!-- Write-up/conclusion section -->
 
-_When all the behaviour is implemented, feel free to add some observations or conclusions you like to share in the section_
+#### Observations:
+
+- Unified Endpoint: Combining multiple endpoints into a single search endpoint simplifies the API and improves performance.
+- Debouncing: Enhances user experience by reducing unnecessary API calls and ensuring faster, more responsive search. A third party library was used to save time.
+- React Router: Provides a clean navigation approach for viewing detailed information about different items using URL parameters.
+- Tailwind CSS: Utilized for efficient styling, ensuring a visually appealing and responsive design.
+
+#### Conclusions:
+
+- Scalability: The architecture supports future growth and feature additions with minimal changes.
+- User Experience: Effective search and navigation features contribute to a smooth and intuitive interface.
+- Maintainability: A modular structure and streamlined API design enhance code maintainability and ease of updates.
 
 ### Database structure
 
