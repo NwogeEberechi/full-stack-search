@@ -18,38 +18,28 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.get("/hotels", async (req, res) => {
-  const mongoClient = new MongoClient(DATABASE_URL);
-  console.log("Connecting to MongoDB...");
-
-  try {
-    await mongoClient.connect();
-    console.log("Successfully connected to MongoDB!");
-    const db = mongoClient.db();
-    const collection = db.collection("hotels");
-    res.send(await collection.find().toArray());
-  } finally {
-    await mongoClient.close();
-  }
-});
+const mongoClient = new MongoClient(DATABASE_URL);
+console.log("Connecting to MongoDB...");
+try {
+  await mongoClient.connect();
+  console.log("Successfully connected to MongoDB!");
+} catch (error) {
+  console.error(`Error connecting to MongoDB: ${error}`);
+  process.exit(1);
+}
+const db = mongoClient.db();
 
 app.get("/search", async (req, res) => {
   const { query } = req.query;
-  const escapedQuery = (query as string)?.replace(
-    /[.*+?^${}()|[\]\\]/g,
-    "\\$&"
-  );
-  const regex = new RegExp(escapedQuery, "i");
+
   if (!query || typeof query !== "string") {
     return res.status(400).send("Query parameter is required");
   }
 
-  const mongoClient = new MongoClient(DATABASE_URL);
+  const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const regex = new RegExp(escapedQuery, "i");
 
   try {
-    await mongoClient.connect();
-    const db = mongoClient.db();
-
     const [hotels, cities, countries] = await Promise.all([
       db
         .collection("hotels")
@@ -71,65 +61,64 @@ app.get("/search", async (req, res) => {
         .toArray(),
     ]);
     res.send({ hotels, cities, countries });
-  } finally {
-    await mongoClient.close();
+  } catch (error) {
+    console.error(`Error fetching search results: ${error}`);
+    res.status(500).send("Error fetching search results");
   }
 });
 
 app.get("/hotels/:id", async (req, res) => {
   const { id } = req.params;
-  const mongoClient = new MongoClient(DATABASE_URL);
 
   try {
-    await mongoClient.connect();
-    const db = mongoClient.db();
-    const collection = db.collection("hotels");
-    const hotel = await collection.findOne({ _id: new ObjectId(id) });
+    const hotel = await db
+      .collection("hotels")
+      .findOne({ _id: new ObjectId(id) });
+
     if (hotel) {
-      res.json(hotel);
+      res.send(hotel);
     } else {
       res.status(404).send("Hotel not found");
     }
-  } finally {
-    await mongoClient.close();
+  } catch (error) {
+    console.error(`Error fetching hotel with id: ${id}. Error: ${error}`);
+    res.status(500).send(`Error fetching hotel with id: ${id}`);
   }
 });
 
 app.get("/cities/:name", async (req, res) => {
   const { name } = req.params;
-  const mongoClient = new MongoClient(DATABASE_URL);
 
   try {
-    await mongoClient.connect();
-    const db = mongoClient.db();
-    const collection = db.collection("cities");
-    const city = await collection.findOne({ name: name });
+    const city = await db.collection("cities").findOne({ name: name });
+
     if (city) {
-      res.json(city);
+      res.send(city);
     } else {
       res.status(404).send("City not found");
     }
-  } finally {
-    await mongoClient.close();
+  } catch (error) {
+    console.error(`Error fetching city with name ${name}. Error: ${error}`);
+    res.status(500).send(`Error fetching city with name: ${name}`);
   }
 });
 
 app.get("/countries/:country", async (req, res) => {
   const { country } = req.params;
-  const mongoClient = new MongoClient(DATABASE_URL);
 
   try {
-    await mongoClient.connect();
-    const db = mongoClient.db();
-    const collection = db.collection("countries");
-    const countryDetails = await collection.findOne({ country: country });
+    const countryDetails = await db
+      .collection("countries")
+      .findOne({ country: country });
+
     if (countryDetails) {
-      res.json(countryDetails);
+      res.send(countryDetails);
     } else {
       res.status(404).send("Country not found");
     }
-  } finally {
-    await mongoClient.close();
+  } catch (error) {
+    console.error(`Error fetching country: ${country}. Error: ${error}`);
+    res.status(500).send(`Error fetching country with name: ${country}`);
   }
 });
 

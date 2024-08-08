@@ -1,5 +1,5 @@
 interface AppLayoutProps {
-  children: any;
+  children: React.ReactNode;
 }
 
 const AppLayout: React.FC<AppLayoutProps> = (props) => {

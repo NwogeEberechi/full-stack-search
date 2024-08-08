@@ -1,19 +1,27 @@
 // ItemDetail.tsx
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { API_URL } from "../constants";
 import AppLayout from "./AppLayout";
+
+type ItemType = {
+  hotel_name?: string;
+  name?: string;
+  country?: string;
+};
 
 const fetchItemDetail = async (
   type: string | undefined,
   id: string | undefined
 ) => {
-  const response = await fetch(`http://localhost:3001/${type}/${id}`);
+  const response = await fetch(`${API_URL}/${type}/${id}`);
   return response.json();
 };
 
 const ItemDetail = () => {
   const { type, id } = useParams<{ type: string; id: string }>();
-  const [item, setItem] = useState<any>(null);
+
+  const [item, setItem] = useState<ItemType | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
